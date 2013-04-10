@@ -1,6 +1,5 @@
----
 Playing with Big Data Coursera course related stuffs
----
+====================================================
 
 > import Text.Printf -- will be used for pretty-printing
 
@@ -10,13 +9,14 @@ probability `p`.
 > informationBits :: Double -> Double
 > informationBits p = -(logBase 2 p)
 
-With increasing probability the amount of information decreases:
+With decreasing probability the amount of information increases. Following
+snippet:
 
 ~~~{.haskell}
 sequence_  [ printf "%.2f -> %.2f\n" a $ informationBits a | a <- [0.99, 0.8 .. 0]]
 ~~~
 
-Produces:
+produces:
 
 ~~~
 0.99 -> 0.01 bits
@@ -29,5 +29,5 @@ Produces:
 
 Interesting articles
 --------------------
-<a href="http://www.euclideanspace.com/maths/statistics/i_theory/bits.htm">Measuring Bits of Information</a>.
+[Measuring Bits of Information](http://www.euclideanspace.com/maths/statistics/i_theory/bits.htm)
 
