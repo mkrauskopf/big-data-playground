@@ -47,6 +47,9 @@ Define few type aliases for further type-signatures to be clearer.
 > type Term = String
 > type DocumentFrequency = M.Map String Integer
 
+Text Frequency
+---
+
 > -- Computes /term frequency/ a number of a term occurrences in a given
 > -- document.
 > tf :: Term -> Document -> Double
@@ -75,29 +78,54 @@ course -> 0.06
 non-existing -> 0.00
 ~~~
 
-> -- Computes /inverse document frequency/ of a given term. For rarely
-> -- occurring terms the result will be high whereas for frequently occurring
-> -- ones will be low.
-> idf :: Term -> DocumentFrequency -> Integer -> Double
-> idf t df n = logBase 2 (fromInteger n / fromInteger dft)
->   where dft = fromMaybe 1 $ M.lookup t df
-> -- TODO: probably we should return Maybe Double instead cheating with default '1'
+Inverse Document Frequency
+---
 
-Followin snippet computes _Inverse Document Frequency_ on a sample used it the
-[ItIR] book in [chatper][ItIR-IDF] dedicated to the topic.
+Define some sample data used in samples below:
 
-Running `idfSample`:
-
-> idfSample :: IO ()
-> idfSample = mapM_ printIDF ["car", "auto", "insurance", "best"]
->     where
->       df :: DocumentFrequency
->       df = M.fromList [ ("car", 18165)
+> sampleTerms :: [Term]
+> sampleTerms = ["car", "auto", "insurance", "best"]
+>
+> sampleDF :: DocumentFrequency
+> sampleDF = M.fromList [ ("car", 18165)
 >                       , ("auto", 6723)
 >                       , ("insurance", 19241)
 >                       , ("best", 25235)
 >                       ]
->       printIDF term = printf "%s -> %.2f\n" term $ idf term df 806791
+>
+> sampleDoc1, sampleDoc2, sampleDoc3 :: Document
+> sampleDoc1 = add 27 "car "  ++ add 3  "auto " ++ add 0  "insurance " ++ add 14 "best "
+> sampleDoc2 = add 4  "car "  ++ add 33 "auto " ++ add 33 "insurance " ++ add 0  "best "
+> sampleDoc3 = add 24 "car "  ++ add 0  "auto " ++ add 29 "insurance " ++ add 17 "best "
+> add n w = concat $ replicate n w
+>
+> sampleN :: Integer
+> sampleN = 806791
+
+Explanations and points to resources are given as the data are used in
+individual samples.
+
+> -- Computes /inverse document frequency/ of a given term. For rarely
+> -- occurring terms the result will be high whereas for frequently occurring
+> -- ones will be low.
+> idf :: Term
+>     -> DocumentFrequency
+>     -> Integer -- ^ total number of documents
+>     -> Double
+> idf t df n = logBase 2 (fromInteger n / fromInteger dft)
+>   where dft = fromMaybe 1 $ M.lookup t df
+> -- TODO: probably we should return Maybe Double instead cheating with default '1'
+
+Following snippet computes _Inverse Document Frequency_ on a sample used it the
+[ItIR] book in [chapter][ItIR-IDF] dedicated to the topic.
+
+Running `idfSample`:
+
+> idfSample :: IO ()
+> idfSample = mapM_ printIDF sampleTerms
+>     where
+>       printIDF term = printf "%s -> %.2f\n" term $ idf term sampleDF sampleN
+
 
 produces:
 
@@ -108,6 +136,46 @@ insurance -> 5.39
 best -> 5.00
 ~~~
 
-[ItIR-IDF]: http://nlp.stanford.edu/IR-book/html/htmledition/inverse-document-frequency-1.html "Introduction to Information Retrieval"
+tf-idf weighting
+---
+
+> -- Computes _tf-idf_ for a given term in a document using given document
+> -- frequency and total number of documents.
+> tfIdf :: Term -> Document -> DocumentFrequency -> Integer -> Double
+> tfIdf t d df n = tf t d * idf t df n
+
+Running `tfIdfSample`:
+
+> tfIdfSample :: IO ()
+> tfIdfSample = mapM_ printTfIdfForDoc docs
+>     where
+>       docs = [sampleDoc1, sampleDoc2, sampleDoc3]
+>       printTfIdfForDoc :: Document -> IO ()
+>       printTfIdfForDoc doc = putStrLn "---------" >> mapM_ (printTfIdf doc) sampleTerms
+>       printTfIdf :: Document -> Term -> IO ()
+>       printTfIdf doc term = printf "%s -> %.2f\n" term $ tfIdf term doc sampleDF sampleN
+
+produces results for each sample document:
+
+~~~
+---------
+car -> 3.36
+auto -> 0.47
+insurance -> 0.00
+best -> 1.59
+-----------
+car -> 0.31
+auto -> 3.26
+insurance -> 2.54
+best -> 0.00
+-----------
+car -> 1.88
+auto -> 0.00
+insurance -> 2.23
+best -> 1.21
+~~~
+
+[ItIR-IDF]: http://nlp.stanford.edu/IR-book/html/htmledition/inverse-document-frequency-1.html "Inverse document frequency"
+[ItIR-TF-IDF]: http://nlp.stanford.edu/IR-book/html/htmledition/tf-idf-weighting-1.html "Tf-idf weighting"
 [ItIR]: http://nlp.stanford.edu/IR-book/html/htmledition/irbook.html "Introduction to Information Retrieval"
 
