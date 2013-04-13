@@ -85,20 +85,20 @@ Define some sample data used in samples below:
 
 > sampleTerms :: [Term]
 > sampleTerms = ["car", "auto", "insurance", "best"]
->
+
 > sampleDF :: DocumentFrequency
 > sampleDF = M.fromList [ ("car", 18165)
 >                       , ("auto", 6723)
 >                       , ("insurance", 19241)
 >                       , ("best", 25235)
 >                       ]
->
+
 > sampleDoc1, sampleDoc2, sampleDoc3 :: Document
 > sampleDoc1 = add 27 "car "  ++ add 3  "auto " ++ add 0  "insurance " ++ add 14 "best "
 > sampleDoc2 = add 4  "car "  ++ add 33 "auto " ++ add 33 "insurance " ++ add 0  "best "
 > sampleDoc3 = add 24 "car "  ++ add 0  "auto " ++ add 29 "insurance " ++ add 17 "best "
 > add n w = concat $ replicate n w
->
+
 > sampleN :: Integer
 > sampleN = 806791
 
